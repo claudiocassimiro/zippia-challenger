@@ -36,8 +36,11 @@
   width: 100%;
   max-width: 32rem;
   border-radius: 0.5rem;
+  text-decoration: none;
+  color: #000;
   cursor: pointer;
   transition: 0.4s;
+  margin-top: 0.8rem;
 }
 
 .button:hover {
