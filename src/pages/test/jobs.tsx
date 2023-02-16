@@ -10,11 +10,12 @@ interface JobsProps {
   totalJobs: number;
 }
 
-const Jobs = ({ jobs, totalJobs }: JobsProps) => {
+const Jobs = ({ jobs }: JobsProps) => {
   const [selectedCompanyName, setSelectedCompanyName] = useState("");
   const [filteredJobsByCompanyName, setFilteredJobsByCompanyName] = useState<
     Jobs[]
   >([]);
+  const [filteredRecentJobs, setFilteredRecentJobs] = useState<Jobs[]>([]);
 
   useMemo(() => {
     const filteredJobs = jobs.filter(
@@ -27,17 +28,37 @@ const Jobs = ({ jobs, totalJobs }: JobsProps) => {
 
   const companyNames = jobs.map((job) => job.companyName);
 
-  const handleSelecteChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCompanyName(event.target.value); // Take the companyName seleceted by user
+  const getHourDiff = (date1: number, date2: number) => {
+    console.log("date", date1, date2);
+    const diffInMs = Math.abs(date2 - date1); // diff in milliseconds
+    const diffInHours = diffInMs / (1000 * 60 * 60); // diff in hours
+    return diffInHours;
   };
 
   const resetFilters = () => {
+    setFilteredRecentJobs([]);
     setFilteredJobsByCompanyName([]);
     setSelectedCompanyName("");
   };
 
-  // console.log("filteredJobsByCompanyName", filteredJobsByCompanyName);
-  // console.log(jobs, totalJobs);
+  const filterByRecentJobs = () => {
+    resetFilters();
+    const now = new Date().getTime();
+    const recentJobs = jobs.filter((job) => {
+      const postingDate = new Date(job.postingDate).getTime();
+      if (getHourDiff(now, postingDate) <= 168) {
+        // here the code verify if the diff between today and posting job date is minor or equal 7 days
+        return job;
+      }
+    });
+
+    setFilteredRecentJobs(recentJobs);
+  };
+
+  const handleSelecteChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    resetFilters();
+    setSelectedCompanyName(event.target.value); // Take the companyName seleceted by user
+  };
 
   return (
     <div className={styles.container}>
@@ -55,14 +76,25 @@ const Jobs = ({ jobs, totalJobs }: JobsProps) => {
           onChange={handleSelecteChange}
           companyNames={companyNames}
         />
+        <button
+          className={styles.recentJobsButton}
+          type="button"
+          onClick={filterByRecentJobs}
+        >
+          Get recent jobs
+        </button>
         <button className={styles.button} type="button" onClick={resetFilters}>
           Reset Filters
         </button>
       </div>
       <div className={styles.jobsContainer}>
-        {filteredJobsByCompanyName.length > 0
+        {filteredRecentJobs.length > 0
+          ? filteredRecentJobs.map((job, index) => {
+              return index <= 9 ? <JobCard key={job.jobId} {...job} /> : null; // rendering recents posted jobs
+            })
+          : filteredJobsByCompanyName.length > 0
           ? filteredJobsByCompanyName.map((job, index) => {
-              return index <= 9 ? <JobCard key={job.jobId} {...job} /> : null; // rendering all job cards
+              return index <= 9 ? <JobCard key={job.jobId} {...job} /> : null; // if the user filer by companyName
             })
           : jobs.map((job, index) => {
               return index <= 9 ? <JobCard key={job.jobId} {...job} /> : null; // rendering all job cards
