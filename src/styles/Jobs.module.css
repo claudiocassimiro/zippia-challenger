@@ -19,14 +19,27 @@
   justify-content: space-around;
   align-items: center;
   width: 100%;
-  padding: 1.5rem;
+  padding: 1rem;
+}
+
+.recentJobsButton {
+  background-color: #7fffd4;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.8rem;
+  transition: 0.4s;
+  cursor: pointer;
+}
+
+.recentJobsButton:hover {
+  background-color: #5df6c3;
 }
 
 .button {
   background-color: #ffe4c4;
   border: none;
   border-radius: 0.5rem;
-  padding: 1rem;
+  padding: 0.8rem;
   transition: 0.4s;
   cursor: pointer;
 }
