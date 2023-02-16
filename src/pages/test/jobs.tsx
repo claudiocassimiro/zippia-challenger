@@ -1,7 +1,9 @@
 import JobCard from "@/components/JobCard";
+import SelectJobByCompany from "@/components/SelectJobByCompany";
 import styles from "@/styles/Jobs.module.css";
 import { Jobs } from "@/utils/types";
 import Image from "next/image";
+import { ChangeEvent, useMemo, useState } from "react";
 
 interface JobsProps {
   jobs: Jobs[];
@@ -9,7 +11,33 @@ interface JobsProps {
 }
 
 const Jobs = ({ jobs, totalJobs }: JobsProps) => {
-  console.log(jobs, totalJobs);
+  const [selectedCompanyName, setSelectedCompanyName] = useState("");
+  const [filteredJobsByCompanyName, setFilteredJobsByCompanyName] = useState<
+    Jobs[]
+  >([]);
+
+  useMemo(() => {
+    const filteredJobs = jobs.filter(
+      (job) => job.companyName === selectedCompanyName
+    );
+
+    setFilteredJobsByCompanyName(filteredJobs);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCompanyName]);
+
+  const companyNames = jobs.map((job) => job.companyName);
+
+  const handleSelecteChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCompanyName(event.target.value); // Take the companyName seleceted by user
+  };
+
+  const resetFilters = () => {
+    setFilteredJobsByCompanyName([]);
+    setSelectedCompanyName("");
+  };
+
+  // console.log("filteredJobsByCompanyName", filteredJobsByCompanyName);
+  // console.log(jobs, totalJobs);
 
   return (
     <div className={styles.container}>
@@ -21,10 +49,24 @@ const Jobs = ({ jobs, totalJobs }: JobsProps) => {
           height={36}
         />
       </header>
+      <div className={styles.containerFilters}>
+        <SelectJobByCompany
+          selectedCompanyName={selectedCompanyName}
+          onChange={handleSelecteChange}
+          companyNames={companyNames}
+        />
+        <button className={styles.button} type="button" onClick={resetFilters}>
+          Reset Filters
+        </button>
+      </div>
       <div className={styles.jobsContainer}>
-        {jobs.map((job, index) => {
-          return index <= 9 ? <JobCard key={job.jobId} {...job} /> : null;
-        })}
+        {filteredJobsByCompanyName.length > 0
+          ? filteredJobsByCompanyName.map((job, index) => {
+              return index <= 9 ? <JobCard key={job.jobId} {...job} /> : null; // rendering all job cards
+            })
+          : jobs.map((job, index) => {
+              return index <= 9 ? <JobCard key={job.jobId} {...job} /> : null; // rendering all job cards
+            })}
       </div>
     </div>
   );
